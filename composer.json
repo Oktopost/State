@@ -1,0 +1,20 @@
+{
+    "name": "oktopost/state",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexey Puchkov",
+            "email": "alexey.pkv@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "oktopost/objection": "^1.0",
+        "unstable-cacao/structura": "^1.0"
+    },
+	"autoload": {
+		"psr-0": {
+			"State": "src"
+		}
+	}
+}
