@@ -80,6 +80,8 @@ class Engine
 			$this->transition($input[$i]);
 		}
 		
+		$this->machine->finalize();
+		
 		return $this->machine->state();
 	}
 }
