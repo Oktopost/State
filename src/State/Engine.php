@@ -4,11 +4,15 @@ namespace State;
 
 use State\Configuration\Parser;
 use State\Configuration\KeyConfig;
+use State\Configuration\StateConfig;
 use State\Exceptions\StateException;
 
 
 class Engine
 {
+	public const CHANGE_STATE_KEY	= '\0';
+	
+	
 	/** @var IMachine */
 	private $machine;
 	
@@ -31,6 +35,24 @@ class Engine
 		return $args;
 	}
 	
+	private function stateExitCallback(?StateConfig $state = null)
+	{
+		if (!$state)
+		{
+			$state = $this->config->getState($this->stateName);
+		}
+		
+		if (!$state->hasKeyConfig(self::CHANGE_STATE_KEY))
+		{
+			return;
+		}
+		
+		$keyConfig = $state->getKeyConfig(self::CHANGE_STATE_KEY);
+		$args = $this->getArgs(self::CHANGE_STATE_KEY, self::CHANGE_STATE_KEY, $keyConfig);
+		
+		$keyConfig->invoke($this->machine, $args);
+	}
+	
 	private function transition(string $char): void
 	{
 		$key = $this->machine->resolveKey($char);
@@ -43,6 +65,11 @@ class Engine
 		$args = $this->getArgs($char, $key, $keyConfig);
 		
 		$keyConfig->invoke($this->machine, $args);
+		
+		if ($args->CurrentState != $args->NextState)
+		{
+			$this->stateExitCallback($state);
+		}
 		
 		$this->stateName = $keyConfig->NextState;
 	}
@@ -79,6 +106,8 @@ class Engine
 		{
 			$this->transition($input[$i]);
 		}
+		
+		$this->stateExitCallback();
 		
 		$this->machine->finalize();
 		
