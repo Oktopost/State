@@ -35,7 +35,7 @@ class Engine
 		return $args;
 	}
 	
-	private function stateExitCallback(?StateConfig $state = null)
+	private function stateExitCallback(?StateConfig $state = null, ?KeyConfig $exitKeyConfig = null)
 	{
 		if (!$state)
 		{
@@ -48,6 +48,16 @@ class Engine
 		}
 		
 		$keyConfig = $state->getKeyConfig(self::CHANGE_STATE_KEY);
+		
+		if ($exitKeyConfig)
+		{
+			$keyConfig->NextState = $exitKeyConfig->NextState;
+		}
+		else
+		{
+			$keyConfig->NextState = '';
+		}
+		
 		$args = $this->getArgs(self::CHANGE_STATE_KEY, self::CHANGE_STATE_KEY, $keyConfig);
 		
 		$keyConfig->invoke($this->machine, $args);
@@ -68,7 +78,7 @@ class Engine
 		
 		if ($args->CurrentState != $args->NextState)
 		{
-			$this->stateExitCallback($state);
+			$this->stateExitCallback($state, $keyConfig);
 		}
 		
 		$this->stateName = $keyConfig->NextState;
